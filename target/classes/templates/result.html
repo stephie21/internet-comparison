@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Internetanbieter Vergleich</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+<div class="container mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-6 text-center text-blue-800">Internetanbieter Vergleich</h1>
+
+    <!-- Filter -->
+    <div class="mb-4 flex flex-col md:flex-row gap-4 items-center justify-center">
+        <label for="priceFilter" class="text-gray-700 font-medium">Maximaler Preis (€):</label>
+        <input type="number" id="priceFilter" class="border border-gray-300 rounded p-2 w-48" placeholder="z. B. 39.99" oninput="filterByPrice()" />
+    </div>
+
+    <!-- Tabelle -->
+    <div class="overflow-x-auto shadow-md rounded-lg bg-white">
+        <table id="offersTable" class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-blue-600 text-white">
+            <tr>
+                <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Anbieter</th>
+                <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Produkt</th>
+                <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Preis</th>
+            </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200" th:each="offer : ${offers}">
+            <tr class="hover:bg-blue-50 transition" th:if="${offer.formattedPrice != null}">
+                <td class="px-6 py-4 text-gray-900" th:text="${offer.provider}">Anbieter</td>
+                <td class="px-6 py-4 text-gray-700" th:text="${offer.product}">Produkt</td>
+                <td class="px-6 py-4 text-gray-700" th:text="${offer.formattedPrice}"
+                    th:attr="data-price=${offer.price}">€
+                    0,00
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Teilen-Link -->
+    <div th:if="${shareLink}" class="mt-6 text-center">
+        <p class="text-sm text-gray-600">Dein Link zum Teilen:</p>
+        <a th:href="@{${shareLink}}" class="text-blue-600 underline text-lg font-semibold break-all" target="_blank"
+           th:text="${shareLink}">/compare/shared/123</a>
+    </div>
+</div>
+
+<script>
+    function filterByPrice() {
+        const max = parseFloat(document.getElementById("priceFilter").value);
+        const rows = document.querySelectorAll("#offersTable tbody tr");
+
+        rows.forEach(row => {
+            const price = parseFloat(row.cells[2].dataset.price);
+            row.style.display = isNaN(max) || price <= max ? "" : "none";
+        });
+    }
+</script>
+
+</body>
+</html>

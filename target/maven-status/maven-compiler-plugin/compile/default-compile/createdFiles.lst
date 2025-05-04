@@ -1,0 +1,6 @@
+com\check24\internetcomparison\InternetComparisonApplication.class
+com\check24\internetcomparison\api\PingPerfectClient.class
+com\check24\internetcomparison\model\InternetOffer.class
+com\check24\internetcomparison\service\ComparisonService.class
+com\check24\internetcomparison\service\ComparisonServiceImpl.class
+com\check24\internetcomparison\controller\ComparisonController.class

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Internetvergleich starten</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center font-sans">
+
+<div class="bg-white shadow-lg rounded-lg p-8 w-full max-w-xl">
+    <h1 class="text-3xl font-bold text-center text-blue-700 mb-6">Internetanbieter vergleichen</h1>
+
+    <form action="#" method="post" th:action="@{/compare}" class="space-y-4">
+        <div>
+            <label for="zip" class="block text-sm font-medium text-gray-700">Postleitzahl</label>
+            <input type="text" id="zip" name="zip" required
+                   class="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+
+        <div>
+            <label for="city" class="block text-sm font-medium text-gray-700">Stadt</label>
+            <input type="text" id="city" name="city" required
+                   class="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+
+        <div>
+            <label for="street" class="block text-sm font-medium text-gray-700">Straße</label>
+            <input type="text" id="street" name="street" required
+                   class="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+
+        <div>
+            <label for="houseNumber" class="block text-sm font-medium text-gray-700">Hausnummer</label>
+            <input type="text" id="houseNumber" name="houseNumber" required
+                   class="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+
+        <div class="text-center">
+            <button type="submit"
+                    class="bg-blue-600 text-white px-6 py-2 rounded-lg shadow-md hover:bg-blue-700 transition">
+                Jetzt vergleichen
+            </button>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>
