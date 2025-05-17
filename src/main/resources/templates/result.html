@@ -2,62 +2,167 @@
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Internetanbieter Vergleich</title>
+    <title>Vergleichsergebnisse</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .hidden {
+            display: none !important;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 font-sans">
+<body class="bg-light">
 
-<div class="container mx-auto p-6">
-    <h1 class="text-3xl font-bold mb-6 text-center text-blue-800">Internetanbieter Vergleich</h1>
+<div class="container py-5">
+    <h1 class="display-5 fw-bold mb-4">Verfügbare Internet-Angebote</h1>
 
     <!-- Filter -->
-    <div class="mb-4 flex flex-col md:flex-row gap-4 items-center justify-center">
-        <label for="priceFilter" class="text-gray-700 font-medium">Maximaler Preis (€):</label>
-        <input type="number" id="priceFilter" class="border border-gray-300 rounded p-2 w-48" placeholder="z. B. 39.99" oninput="filterByPrice()" />
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h2 class="h5 mb-3">Filter</h2>
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <input type="number" id="minPrice" placeholder="Minimaler Preis (€/Monat)" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <input type="number" id="maxPrice" placeholder="Maximaler Preis (€/Monat)" class="form-control" />
+                </div>
+            </div>
+            <button id="applyFilter" class="btn btn-primary me-2">Filter anwenden</button>
+            <button id="resetFilter" class="btn btn-secondary">Filter zurücksetzen</button>
+        </div>
     </div>
 
-    <!-- Tabelle -->
-    <div class="overflow-x-auto shadow-md rounded-lg bg-white">
-        <table id="offersTable" class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-blue-600 text-white">
-            <tr>
-                <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Anbieter</th>
-                <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Produkt</th>
-                <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Preis in €</th>
-            </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200" th:each="offer : ${offers}">
-            <tr class="hover:bg-blue-50 transition" th:if="${offer.formattedPrice != null}">
-                <td class="px-6 py-4 text-gray-900" th:text="${offer.provider}">Anbieter</td>
-                <td class="px-6 py-4 text-gray-700" th:text="${offer.product}">Produkt</td>
-                <td class="px-6 py-4 text-gray-700" th:text="${offer.formattedPrice}"
-                    th:attr="data-price=${offer.price}">
-                    0,00
-                </td>
-            </tr>
-            </tbody>
-        </table>
+    <!-- Angebote -->
+    <div id="offers-container">
+        <div th:each="offer : ${offers}" class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title" th:text="${offer.provider + ' - ' + offer.product}"></h5>
+                <p class="card-text">
+                    <strong>Preis:</strong>
+                    <span th:text="${#numbers.formatDecimal(offer.price, 1, 2) + ' €/Monat'}"></span>
+                </p>
+            </div>
+        </div>
     </div>
 
-    <!-- Teilen-Link -->
-    <div th:if="${shareLink}" class="mt-6 text-center">
-        <p class="text-sm text-gray-600">Dein Link zum Teilen:</p>
-        <a th:href="@{${shareLink}}" class="text-blue-600 underline text-lg font-semibold break-all" target="_blank"
-           th:text="${shareLink}">/compare/shared/123</a>
+    <!-- Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="/compare" class="btn btn-secondary">Neue Suche</a>
+        <a th:href="@{'/compare/shared/' + ${resultId}}" class="btn btn-outline-primary">Link teilen</a>
     </div>
 </div>
 
-<script>
-    function filterByPrice() {
-        const max = parseFloat(document.getElementById("priceFilter").value);
-        const rows = document.querySelectorAll("#offersTable tbody tr");
+<!-- Ladeanzeige -->
+<div id="loading-indicator" class="text-center text-muted mt-4">
+    <div class="spinner-border text-primary mb-2" role="status">
+        <span class="visually-hidden">Laden...</span>
+    </div>
+    <div id="loading-text">Lade weitere Angebote...</div>
+    <div id="loading-status" class="small mt-2"></div>
+</div>
 
-        rows.forEach(row => {
-            const price = parseFloat(row.cells[2].dataset.price);
-            row.style.display = isNaN(max) || price <= max ? "" : "none";
-        });
+<script th:inline="javascript">
+    let currentIndex = 0;
+    let hasMore = true;
+    let isLoading = true;
+    let totalOffers = 0;
+    const resultId = [[${resultId}]];
+    const zip = [[${zip}]];
+    const city = '[[${city}]]';
+    const street = '[[${street}]]';
+    const houseNumber = '[[${houseNumber}]]';
+
+    function renderOffer(offer) {
+        const container = document.createElement('div');
+        container.className = 'card mb-3';
+        container.innerHTML = `
+            <div class="card-body">
+                <h5 class="card-title">${offer.provider} - ${offer.product}</h5>
+                <p class="card-text"><strong>Preis:</strong> ${offer.price.toFixed(2)} €/Monat</p>
+            </div>
+        `;
+        document.getElementById('offers-container').appendChild(container);
     }
-</script>
 
+    async function checkLoadingStatus() {
+        const response = await fetch(`/compare/loading-status?resultId=${resultId}&zip=${zip}&city=${city}&street=${street}&houseNumber=${houseNumber}`);
+        const data = await response.json();
+        const loadingText = document.getElementById('loading-text');
+        const loadingStatus = document.getElementById('loading-status');
+        totalOffers = data.totalOffers;
+        if (data.loading) {
+            loadingText.textContent = 'Lade weitere Angebote...';
+            loadingStatus.textContent = `Geladen: ${data.loadedProviders} von ${data.totalProviders} Anbietern (${totalOffers} Angebote)`;
+            isLoading = true;
+        } else {
+            loadingText.textContent = 'Alle Angebote geladen';
+            loadingStatus.textContent = `Insgesamt ${data.loadedProviders} Anbieter geladen (${totalOffers} Angebote)`;
+            isLoading = false;
+        }
+        return data.loading;
+    }
+
+    async function loadNextBatch() {
+        const response = await fetch(`/compare/batch?resultId=${resultId}&zip=${zip}&city=${city}&street=${street}&houseNumber=${houseNumber}&fromIndex=${currentIndex}`);
+        const data = await response.json();
+        if (data.offers && data.offers.length > 0) {
+            data.offers.forEach(renderOffer);
+            currentIndex = data.currentIndex;
+            hasMore = data.hasMore;
+            totalOffers = data.totalOffers;
+        } else {
+            hasMore = data.hasMore;
+        }
+    }
+
+    async function pollForOffers() {
+        await checkLoadingStatus();
+        await loadNextBatch();
+        if (!hasMore && !isLoading) {
+            document.getElementById('loading-indicator').classList.add('hidden');
+        } else {
+            setTimeout(pollForOffers, 1500);
+        }
+    }
+
+    pollForOffers();
+
+    // Filter
+    document.getElementById('applyFilter').addEventListener('click', async () => {
+        const min = document.getElementById('minPrice').value;
+        const max = document.getElementById('maxPrice').value;
+        const url = `/compare/filter?resultId=${resultId}&zip=${zip}&city=${city}&street=${street}&houseNumber=${houseNumber}&minPrice=${min}&maxPrice=${max}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        document.getElementById('offers-container').innerHTML = '';
+        data.offers.forEach(renderOffer);
+        hasMore = false;
+        isLoading = false;
+        totalOffers = data.totalOffers;
+        document.getElementById('loading-indicator').classList.add('hidden');
+    });
+
+    document.getElementById('resetFilter').addEventListener('click', async () => {
+        document.getElementById('minPrice').value = '';
+        document.getElementById('maxPrice').value = '';
+        document.getElementById('offers-container').innerHTML = '';
+        hasMore = true;
+        isLoading = true;
+        document.getElementById('loading-indicator').classList.remove('hidden');
+        // Lade alle Angebote aus dem Cache und zeige sie an
+        const url = `/compare/batch?resultId=${resultId}&zip=${zip}&city=${city}&street=${street}&houseNumber=${houseNumber}&fromIndex=0`;
+        const res = await fetch(url);
+        const data = await res.json();
+        data.offers.forEach(renderOffer);
+        hasMore = data.hasMore;
+        isLoading = data.loading;
+        if (!hasMore && !isLoading) {
+            document.getElementById('loading-indicator').classList.add('hidden');
+        } else {
+            pollForOffers();
+        }
+    });
+</script>
 </body>
 </html>

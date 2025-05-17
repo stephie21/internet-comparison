@@ -1,0 +1,29 @@
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# Maven build output
+target/
+*.class
+*.jar
+
+# Logs
+*.log
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Secrets / private Schlüssel
+*.p12
+*.pem
+*.key
+
+# Test reports
+surefire-reports/
+
+# Maven local wrapper files (optional)
+.mvn/

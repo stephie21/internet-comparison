@@ -4,6 +4,50 @@
     <meta charset="UTF-8">
     <title>Internetvergleich starten</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .loading-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .loading-spinner {
+            width: 3rem;
+            height: 3rem;
+        }
+        .loading-progress {
+            width: 100%;
+            max-width: 300px;
+            margin-top: 1rem;
+        }
+        .loading-text {
+            margin-top: 1rem;
+            font-size: 1.2rem;
+            color: #666;
+        }
+        .loading-progress-bar {
+            height: 4px;
+            background-color: #e9ecef;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .loading-progress-bar-fill {
+            height: 100%;
+            background-color: #007bff;
+            transition: width 0.3s ease;
+        }
+        .hidden {
+            display: none !important;
+        }
+    </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center font-sans">
 
@@ -43,6 +87,67 @@
         </div>
     </form>
 </div>
+
+<!--<div id="loading-container" class="loading-container hidden">-->
+<!--    <div class="spinner-border loading-spinner text-primary" role="status">-->
+<!--        <span class="visually-hidden">Laden...</span>-->
+<!--    </div>-->
+<!--    <div class="loading-progress">-->
+<!--        <div class="loading-progress-bar">-->
+<!--            <div id="loading-progress-bar-fill" class="loading-progress-bar-fill" style="width: 0%"></div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--    <div id="loading-text" class="loading-text">Lade Angebote...</div>-->
+<!--</div>-->
+
+<!--<script>-->
+<!--    const form = document.querySelector('form');-->
+<!--    const loadingContainer = document.getElementById('loading-container');-->
+<!--    const progressBar = document.getElementById('loading-progress-bar-fill');-->
+<!--    const loadingText = document.getElementById('loading-text');-->
+<!--    const submitButton = document.querySelector('button[type="submit"]');-->
+
+<!--    form.addEventListener('submit', async (e) => {-->
+<!--        e.preventDefault();-->
+<!--        -->
+<!--        // Formular-Daten sammeln-->
+<!--        const formData = new FormData(form);-->
+<!--        const data = {-->
+<!--            zip: formData.get('zip'),-->
+<!--            city: formData.get('city'),-->
+<!--            street: formData.get('street'),-->
+<!--            houseNumber: formData.get('houseNumber')-->
+<!--        };-->
+
+<!--        // Ladebalken anzeigen-->
+<!--        loadingContainer.classList.remove('hidden');-->
+<!--        submitButton.disabled = true;-->
+<!--        progressBar.style.width = '0%';-->
+<!--        loadingText.textContent = 'Lade Angebote...';-->
+
+<!--        try {-->
+<!--            // Formular absenden-->
+<!--            const response = await fetch(form.action, {-->
+<!--                method: 'POST',-->
+<!--                headers: {-->
+<!--                    'Content-Type': 'application/x-www-form-urlencoded',-->
+<!--                },-->
+<!--                body: new URLSearchParams(formData)-->
+<!--            });-->
+
+<!--            if (response.ok) {-->
+<!--                // Bei erfolgreicher Antwort zur Ergebnisseite weiterleiten-->
+<!--                window.location.href = response.url;-->
+<!--            } else {-->
+<!--                throw new Error('Fehler beim Laden der Angebote');-->
+<!--            }-->
+<!--        } catch (error) {-->
+<!--            console.error('Fehler:', error);-->
+<!--            loadingText.textContent = 'Fehler beim Laden der Angebote. Bitte versuchen Sie es erneut.';-->
+<!--            submitButton.disabled = false;-->
+<!--        }-->
+<!--    });-->
+<!--</script>-->
 
 </body>
 </html>
