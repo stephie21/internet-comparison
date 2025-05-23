@@ -1,14 +1,10 @@
 server:
-  port: 8080
-#  ssl:
-#    key-store: file:/app/resources/keystore.p12
-#    key-store-password: ${KEYSTORE_PASSWORD}
-#    key-store-type: PKCS12
-#    key-alias: internet-comparison
+  port: ${PORT:8080}  # Railway gibt PORT-Variable mit, unbedingt verwenden!
+  address: 0.0.0.0     # Macht die App von außen erreichbar
 
 spring:
   security:
-    require-ssl: true
+    require-ssl: false  # Setze dies auf false, wenn du kein eigenes SSL nutzt
   jackson:
     serialization:
       write-dates-as-timestamps: false
