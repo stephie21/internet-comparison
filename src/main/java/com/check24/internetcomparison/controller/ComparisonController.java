@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Controller
@@ -33,6 +34,12 @@ public class ComparisonController {
     public String showForm(Model model) {
         return "compare";
     }
+
+    @GetMapping("/")
+    public String redirectToCompare() {
+        return "redirect:/compare";
+    }
+
 
     @PostMapping
     public String compare(@RequestParam String zip,
@@ -127,13 +134,13 @@ public class ComparisonController {
         log.info("Filtere {} Angebote", allOffers.size());
 
         // Filtere die Angebote nach Preis
+        Predicate<InternetOffer> priceFilter = offer ->
+                (minPrice == null || offer.getPrice() >= minPrice) &&
+                        (maxPrice == null || offer.getPrice() <= maxPrice);
+
         List<InternetOffer> filteredOffers = allOffers.stream()
-            .filter(offer -> {
-                if (minPrice != null && offer.getPrice() < minPrice) return false;
-                if (maxPrice != null && offer.getPrice() > maxPrice) return false;
-                return true;
-            })
-            .collect(Collectors.toList());
+                .filter(priceFilter)
+                .toList();
 
         log.info("Nach Filterung: {} Angebote", filteredOffers.size());
 
