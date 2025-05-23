@@ -3,27 +3,23 @@ package com.check24.internetcomparison.controller;
 import com.check24.internetcomparison.model.Address;
 import com.check24.internetcomparison.model.InternetOffer;
 import com.check24.internetcomparison.service.ComparisonService;
-import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/compare")
 public class ComparisonController {
 
     private final ComparisonService comparisonService;
-    private static final int BATCH_SIZE = 5;
     private static final Logger log = LoggerFactory.getLogger(ComparisonController.class);
 
     public ComparisonController(ComparisonService comparisonService) {
