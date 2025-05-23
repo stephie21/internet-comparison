@@ -1,7 +1,7 @@
 server:
   port: 8080
   ssl:
-    enabled: true
+    enabled: false
     key-store: file:/app/resources/keystore.p12
     key-store-password: ${KEYSTORE_PASSWORD}
     key-store-type: PKCS12
