@@ -49,8 +49,7 @@ public class ComparisonController {
                 zip, city, street, houseNumber, resultId);
     }
 
-    // GET /compare/result zeigt Ergebnisseite an
-    @GetMapping("/result")
+    @GetMapping("/compare/result")
     public String showResult(@RequestParam String zip,
                              @RequestParam String city,
                              @RequestParam String street,
@@ -72,6 +71,7 @@ public class ComparisonController {
 
         return "result";
     }
+
 
     @GetMapping("/batch")
     @ResponseBody
