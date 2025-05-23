@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.Collections;
@@ -16,14 +18,20 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 @Controller
-@RequestMapping("/compare") // Konsistentes Prefix!
-public class ComparisonController {
+@RequestMapping("/compare")
+public class ComparisonController implements WebMvcConfigurer {
 
     private final ComparisonService comparisonService;
     private static final Logger log = LoggerFactory.getLogger(ComparisonController.class);
 
     public ComparisonController(ComparisonService comparisonService) {
         this.comparisonService = comparisonService;
+    }
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/**")
+                .addResourceLocations("classpath:/static/");
     }
 
     // GET /compare zeigt die Formularseite
@@ -49,7 +57,7 @@ public class ComparisonController {
                 zip, city, street, houseNumber, resultId);
     }
 
-    @GetMapping("/compare/result")
+    @GetMapping("/result")
     public String showResult(@RequestParam String zip,
                              @RequestParam String city,
                              @RequestParam String street,

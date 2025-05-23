@@ -149,5 +149,44 @@
 <!--    });-->
 <!--</script>-->
 
+<!-- Angebote anzeigen -->
+<div id="offers-container" class="row mt-6"></div>
+
+<script>
+function displayOffers(offers) {
+    console.log('Angebote zum Anzeigen:', offers);
+    const offersContainer = document.getElementById('offers-container');
+    offersContainer.innerHTML = '';
+
+    if (offers.length === 0) {
+        offersContainer.innerHTML = '<div class="alert alert-info">Keine Angebote gefunden</div>';
+        return;
+    }
+
+    offers.forEach(offer => {
+        console.log('Verarbeite Angebot:', offer);
+        const card = document.createElement('div');
+        card.className = 'col-md-6 col-lg-4 mb-4';
+        card.innerHTML = `
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">${offer.provider}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">${offer.name}</h6>
+                    <p class="card-text">
+                        <strong>Geschwindigkeit:</strong> ${offer.speed} Mbit/s<br>
+                        <strong>Preis:</strong> ${offer.price} €/Monat<br>
+                        <strong>Vertragslaufzeit:</strong> ${offer.contractLength} Monate
+                    </p>
+                </div>
+                <div class="card-footer bg-transparent border-top-0">
+                    <a href="${offer.url}" target="_blank" class="btn btn-primary">Zum Angebot</a>
+                </div>
+            </div>
+        `;
+        offersContainer.appendChild(card);
+    });
+}
+</script>
+
 </body>
 </html>

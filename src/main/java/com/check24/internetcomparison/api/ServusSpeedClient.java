@@ -16,6 +16,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
 
 @Component
 public class ServusSpeedClient implements ProviderClient {
@@ -43,11 +44,14 @@ public class ServusSpeedClient implements ProviderClient {
         int retryCount = 0;
         while (true) {
             try {
-                return restTemplate.exchange(url, method, request, responseType);
+                log.debug("ServusSpeed: Sende Anfrage an {} mit Methode {}", url, method);
+                ResponseEntity<T> response = restTemplate.exchange(url, method, request, responseType);
+                log.debug("ServusSpeed: Antwort erhalten - Status: {}", response.getStatusCode());
+                return response;
             } catch (ResourceAccessException e) {
                 retryCount++;
                 if (retryCount >= MAX_RETRIES) {
-                    log.error("ServusSpeed: Maximale Anzahl an Wiederholungen erreicht nach {} Versuchen", MAX_RETRIES);
+                    log.error("ServusSpeed: Maximale Anzahl an Wiederholungen erreicht nach {} Versuchen. URL: {}", MAX_RETRIES, url);
                     throw e;
                 }
                 log.warn("ServusSpeed: Timeout bei Anfrage an {}, Wiederholung {}/{}", url, retryCount, MAX_RETRIES);
@@ -57,6 +61,9 @@ public class ServusSpeedClient implements ProviderClient {
                     Thread.currentThread().interrupt();
                     throw new RuntimeException("Wiederholung unterbrochen", ie);
                 }
+            } catch (Exception e) {
+                log.error("ServusSpeed: Unerwarteter Fehler bei Anfrage an {}: {}", url, e.getMessage());
+                throw e;
             }
         }
     }
@@ -94,6 +101,11 @@ public class ServusSpeedClient implements ProviderClient {
                     request,
                     Map.class);
 
+            if (productListResponse.getStatusCode() != HttpStatus.OK) {
+                log.error("ServusSpeed: Ungültiger Status-Code: {} für verfügbare Produkte", productListResponse.getStatusCode());
+                return offers;
+            }
+
             log.info("ServusSpeed: Response Status: {}", productListResponse.getStatusCode());
             log.debug("ServusSpeed: Response Headers: {}", productListResponse.getHeaders());
 
@@ -110,48 +122,67 @@ public class ServusSpeedClient implements ProviderClient {
 
             log.info("ServusSpeed: {} verfügbare Produkte gefunden", availableProducts.size());
 
-            // Step 2: POST request for each product's details
+            // Parallelitätsbegrenzung: Maximal 2 gleichzeitige Requests
+            final Semaphore semaphore = new Semaphore(2);
+
             for (String productId : availableProducts) {
-                log.info("ServusSpeed: Hole Details für Produkt {}", productId);
-                
-                ResponseEntity<Map> detailResponse = executeWithRetry(
-                        BASE_URL + "/api/external/product-details/" + productId,
-                        HttpMethod.POST,
-                        request,
-                        Map.class);
+                semaphore.acquireUninterruptibly();
+                try {
+                    log.info("ServusSpeed: Hole Details für Produkt {}", productId);
 
-                log.debug("ServusSpeed: Detail Response Status: {}", detailResponse.getStatusCode());
+                    ResponseEntity<Map> detailResponse = executeWithRetry(
+                            BASE_URL + "/api/external/product-details/" + productId,
+                            HttpMethod.POST,
+                            request,
+                            Map.class);
 
-                Map details = detailResponse.getBody();
-                if (details == null) {
-                    log.warn("ServusSpeed: Keine Details für Produkt {} erhalten", productId);
-                    continue;
+                    if (detailResponse.getStatusCode() != HttpStatus.OK) {
+                        log.error("ServusSpeed: Ungültiger Status-Code: {} für Produkt {}", detailResponse.getStatusCode(), productId);
+                        continue;
+                    }
+
+                    log.debug("ServusSpeed: Detail Response Status: {}", detailResponse.getStatusCode());
+
+                    Map details = detailResponse.getBody();
+                    if (details == null) {
+                        log.warn("ServusSpeed: Keine Details für Produkt {} erhalten", productId);
+                        continue;
+                    }
+
+                    Map<String, Object> servusSpeedProduct = (Map<String, Object>) details.get("servusSpeedProduct");
+                    if (servusSpeedProduct == null) {
+                        log.warn("ServusSpeed: Keine Produktdaten für ID {} gefunden", productId);
+                        continue;
+                    }
+
+                    String providerName = (String) servusSpeedProduct.get("providerName");
+                    Map<String, Object> productInfo = (Map<String, Object>) servusSpeedProduct.get("productInfo");
+                    Map<String, Object> pricingDetails = (Map<String, Object>) servusSpeedProduct.get("pricingDetails");
+                    Integer discount = (Integer) servusSpeedProduct.get("discount");
+
+                    if (productInfo == null || pricingDetails == null) {
+                        log.warn("ServusSpeed: Unvollständige Produktdaten für ID {}", productId);
+                        continue;
+                    }
+
+                    Integer speed = (Integer) productInfo.get("speed");
+                    Integer priceCent = (Integer) pricingDetails.get("monthlyCostInCent");
+
+                    if (speed == null || priceCent == null) {
+                        log.warn("ServusSpeed: Fehlende Geschwindigkeit oder Preis für ID {}", productId);
+                        continue;
+                    }
+
+                    String name = String.format("%s %d Mbit/s", providerName, speed);
+                    double finalPrice = Math.abs((priceCent - (discount != null ? discount : 0)) / 100.0);
+
+                    log.info("ServusSpeed: Angebot gefunden - {} für {}€", name, finalPrice);
+                    offers.add(new InternetOffer("ServusSpeed", name, finalPrice));
+                } catch (Exception e) {
+                    log.error("Fehler beim Laden von Produkt {}: {}", productId, e.getMessage(), e);
+                } finally {
+                    semaphore.release();
                 }
-
-                Map<String, Object> servusSpeedProduct = (Map<String, Object>) details.get("servusSpeedProduct");
-                if (servusSpeedProduct == null) {
-                    log.warn("ServusSpeed: Keine Produktdaten für ID {} gefunden", productId);
-                    continue;
-                }
-
-                String providerName = (String) servusSpeedProduct.get("providerName");
-                Map<String, Object> productInfo = (Map<String, Object>) servusSpeedProduct.get("productInfo");
-                Map<String, Object> pricingDetails = (Map<String, Object>) servusSpeedProduct.get("pricingDetails");
-                Integer discount = (Integer) servusSpeedProduct.get("discount");
-
-                if (productInfo == null || pricingDetails == null) {
-                    log.warn("ServusSpeed: Unvollständige Produktdaten für ID {}", productId);
-                    continue;
-                }
-
-                Integer speed = (Integer) productInfo.get("speed");
-                Integer priceCent = (Integer) pricingDetails.get("monthlyCostInCent");
-                
-                String name = String.format("%s %d Mbit/s", providerName, speed);
-                double finalPrice = Math.abs((priceCent - (discount != null ? discount : 0)) / 100.0);
-
-                log.info("ServusSpeed: Angebot gefunden - {} für {}€", name, finalPrice);
-                offers.add(new InternetOffer("ServusSpeed", name, finalPrice));
             }
 
         } catch (Exception e) {
