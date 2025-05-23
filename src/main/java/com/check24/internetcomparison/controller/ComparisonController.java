@@ -16,8 +16,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 @Controller
-@RequestMapping("/compare")
-public class ComparisonController {
+    public class ComparisonController {
 
     private final ComparisonService comparisonService;
     private static final Logger log = LoggerFactory.getLogger(ComparisonController.class);
@@ -66,7 +65,7 @@ public class ComparisonController {
         return "result";
     }
 
-    @GetMapping("/batch")
+    @GetMapping("/compare/batch")
     @ResponseBody
     public Map<String, Object> getNextBatch(
         @RequestParam String resultId,
@@ -94,7 +93,7 @@ public class ComparisonController {
         );
     }
 
-    @GetMapping("/loading-status")
+    @GetMapping("/compare/loading-status")
     @ResponseBody
     public Map<String, Object> getLoadingStatus(@RequestParam String resultId,
                                               @RequestParam String zip,
@@ -116,7 +115,7 @@ public class ComparisonController {
         );
     }
 
-    @GetMapping("/filter")
+    @GetMapping("/compare/filter")
     @ResponseBody
     public Map<String, Object> filterOffers(@RequestParam String resultId,
                                           @RequestParam String zip,
@@ -149,7 +148,7 @@ public class ComparisonController {
         );
     }
 
-    @GetMapping("/stream/{resultId}")
+    @GetMapping("/compare/stream/{resultId}")
     public SseEmitter streamOffers(@PathVariable String resultId) {
         SseEmitter emitter = new SseEmitter();
 
