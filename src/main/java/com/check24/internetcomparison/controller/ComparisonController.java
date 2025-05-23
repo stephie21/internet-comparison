@@ -174,4 +174,25 @@ import java.util.function.Predicate;
 
         return emitter;
     }
+    @GetMapping("/result")
+    public String showResult(@RequestParam String zip,
+                             @RequestParam String city,
+                             @RequestParam String street,
+                             @RequestParam String houseNumber,
+                             @RequestParam String resultId,
+                             Model model) {
+        List<InternetOffer> initialOffers = comparisonService.getOffers(zip, city, street, houseNumber);
+
+        model.addAttribute("resultId", resultId);
+        model.addAttribute("offers", initialOffers);
+        model.addAttribute("zip", zip);
+        model.addAttribute("city", city);
+        model.addAttribute("street", street);
+        model.addAttribute("houseNumber", houseNumber);
+        model.addAttribute("currentPage", 0);
+        model.addAttribute("hasMore", true);
+        model.addAttribute("totalProviders", 5);
+
+        return "result";
+    }
 }
