@@ -30,12 +30,6 @@ import java.util.function.Predicate;
         return "compare";
     }
 
-    @GetMapping("/")
-    public String redirectToCompare() {
-        return "redirect:/compare";
-    }
-
-
     @PostMapping
     public String compare(@RequestParam String zip,
                           @RequestParam String city,
