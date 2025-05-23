@@ -1,0 +1,54 @@
+server:
+  port: 8080
+  ssl:
+    enabled: true
+    key-store: classpath:keystore.p12
+    key-store-password: ${KEYSTORE_PASSWORD}
+    key-store-type: PKCS12
+    key-alias: internet-comparison
+
+spring:
+  security:
+    require-ssl: true
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+  application:
+    name: internet-comparison
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    export:
+      prometheus:
+        enabled: true
+
+providers:
+  verbynDich:
+    apiKey: ${VERBYNDICH_API_KEY}
+  byteMe:
+    apiKey: ${BYTEME_API_KEY}
+  webWunder:
+    apiKey: ${WEBWUNDER_API_KEY}
+  servusspeed:
+    username: ${SERVUSSPEED_USERNAME}
+    password: ${SERVUSSPEED_PASSWORD}
+  pingPerfect:
+    clientId: ${PINGPERFECT_CLIENT_ID}
+    signatureSecret: ${PINGPERFECT_SIGNATURE_SECRET}
+
+logging:
+  level:
+    com.check24.internetcomparison: INFO
+    org.springframework.security: INFO
+    io.micrometer: INFO
