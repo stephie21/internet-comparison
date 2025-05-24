@@ -80,6 +80,34 @@ public class ComparisonController implements WebMvcConfigurer {
         return "result";
     }
 
+    @GetMapping("/shared/{resultId}")
+    public String showSharedResult(@PathVariable String resultId, Model model) {
+        // resultId aufsplitten, um die Adresse zu bekommen
+        String[] parts = resultId.split("-");
+        if (parts.length < 4) {
+            model.addAttribute("error", "Ungültiger Link");
+            return "error";
+        }
+        String zip = parts[0];
+        String city = parts[1];
+        String street = parts[2];
+        String houseNumber = parts[3];
+
+        // Angebote laden
+        List<InternetOffer> initialOffers = comparisonService.getOffers(zip, city, street, houseNumber);
+
+        model.addAttribute("resultId", resultId);
+        model.addAttribute("offers", initialOffers);
+        model.addAttribute("zip", zip);
+        model.addAttribute("city", city);
+        model.addAttribute("street", street);
+        model.addAttribute("houseNumber", houseNumber);
+        model.addAttribute("currentPage", 0);
+        model.addAttribute("hasMore", true);
+        model.addAttribute("totalProviders", 5);
+
+        return "result";
+    }
 
     @GetMapping("/batch")
     @ResponseBody
