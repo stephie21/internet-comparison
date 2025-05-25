@@ -1,12 +1,12 @@
-Internet Comparison App
+**Internet Comparison Web App**
 
 Dies ist ein Spring Boot-Projekt, das Internetangebote verschiedener Anbieter vergleicht. Die Anwendung ruft parallel Angebote ab und zeigt sie dem Nutzer auf einer Website, während im Hintergrund weitere Angebote nachgeladen werden.
 
- Ziel
+ **Ziel**
 
 Ziel ist es, dem Nutzer eine schnelle Übersicht über Internetangebote an einer bestimmten Adresse zu geben. Es wird sofort ein erstes Angebot angezeigt, weitere Angebote erscheinen nach und nach (Endlos-Scrollen).
 
- Tech-Stack
+ **Tech-Stack**
 
 Java 17
 
@@ -22,9 +22,9 @@ Railway (Cloud-Deployment)
 
 GitHub (CI / Versionskontrolle)
 
- Aufbau & Architektur
+ **Aufbau & Architektur**
 
-Frontend
+__Frontend__
 
 basiert auf Thymeleaf & TailwindCSS
 
@@ -32,7 +32,7 @@ Formular für Adresseingabe (compare.html)
 
 Ergebnisse mit Endlos-Scrollen (result.html)
 
-Backend
+__Backend__
 
 ComparisonController verarbeitet Eingaben und liefert Batches von Angeboten
 
@@ -62,7 +62,7 @@ GET /compare/batch liefert stufenweise Angebote (5 pro Aufruf)
 
 Frontend fragt alle 3 Sekunden nach neuen Angeboten, bis keine mehr da sind
 
-   Deployment auf Railway
+   **Deployment auf Railway**
 
 Voraussetzungen
 
@@ -93,7 +93,7 @@ Beispiel .gitignore
 application.yml
 keystore.p12
 
-  Status
+  **Status**
 
   Paralleles Laden funktioniert
 
