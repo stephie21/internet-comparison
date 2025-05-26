@@ -1,5 +1,7 @@
 **Internet Comparison Web App**
 
+Verfügerbar unter :https://internet-comparison-production.up.railway.app/compare
+
 Dies ist ein Spring Boot-Projekt, das Internetangebote verschiedener Anbieter vergleicht. Die Anwendung ruft parallel Angebote ab und zeigt sie dem Nutzer auf einer Website, während im Hintergrund weitere Angebote nachgeladen werden.
 
  **Ziel**
