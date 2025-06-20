@@ -2,6 +2,8 @@
 
 Verfügerbar unter :https://internet-comparison-production.up.railway.app/compare
 
+Share Link von einer vorherigen Suche: https://internet-comparison-production.up.railway.app/compare/shared/81375-M%EF%BF%BDnchen-Ringstra%EF%BF%BDe%20-24
+
 Dies ist ein Spring Boot-Projekt, das Internetangebote verschiedener Anbieter vergleicht. Die Anwendung ruft parallel Angebote ab und zeigt sie dem Nutzer auf einer Website, während im Hintergrund weitere Angebote nachgeladen werden.
 
  **Ziel**
