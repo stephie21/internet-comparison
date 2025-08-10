@@ -1,14 +1,37 @@
-**Internet Comparison Web App**
+# Internet Comparison
 
-Verfügerbar unter :https://internet-comparison-production.up.railway.app/compare
+> **Status:** WIP / Prototype – **nicht produktionsreif**.  
+> Fokus: funktionales Grundgerüst & UX (schnelles erstes Ergebnis, danach Nachladen).
 
-Share Link von einer vorherigen Suche: https://internet-comparison-production.up.railway.app/compare/shared/81375-M%EF%BF%BDnchen-Ringstra%EF%BF%BDe%20-24
+## Scope
+- Vergleicht Internet-Tarife verschiedener Provider für eine Adresse.
+- Spring Boot 3 (Java 17), Thymeleaf + Tailwind, parallelisierte Provider-Abfragen.
+- Deployment: z. B. Railway / beliebige Container-Runtime.
 
-Dies ist ein Spring Boot-Projekt, das Internetangebote verschiedener Anbieter vergleicht. Die Anwendung ruft parallel Angebote ab und zeigt sie dem Nutzer auf einer Website, während im Hintergrund weitere Angebote nachgeladen werden.
+## Nicht abgedeckt (noch)
+- Resilienz: Timeouts, Retries, Circuit-Breaker, Bulkheads.
+- Effiziente Ergebniszustellung (SSE/WebSocket statt Polling).
+- Caching mit TTL + Adress-Normalisierung.
+- Rate Limiting, Captcha, Security-Headers, CSRF-Schutz.
+- Telemetrie (structured logging, Metriken, Tracing).
 
- **Ziel**
+## Roadmap (Next)
+1. **Resilience4j** für alle Provider-Clients (Timeout, Retry, Circuit-Breaker).
+2. **SSE-Endpoint** (`text/event-stream`) zum Streamen eingehender Angebote.
+3. **Caffeine Cache** (24h TTL) mit normalisiertem Address-Key.
+4. **Observability**: Micrometer (Timer/Counter pro Provider), Request-ID.
+5. **Input-Validierung** (Bean Validation) + **Rate Limiting** (Bucket4j).
+6. **Dockerize** + Health/Readiness + minimaler CI-Check (`mvn -B verify`).
 
-Ziel ist es, dem Nutzer eine schnelle Übersicht über Internetangebote an einer bestimmten Adresse zu geben. Es wird sofort ein erstes Angebot angezeigt, weitere Angebote erscheinen nach und nach (Endlos-Scrollen).
+## Quickstart (dev)
+```bash
+# Build & run
+./mvnw spring-boot:run
+
+# Prod-ähnlich mit Profil:
+./mvnw -Dspring-boot.run.profiles=prod spring-boot:run
+
+
 
  **Tech-Stack**
 
